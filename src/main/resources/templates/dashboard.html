@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Smart HRMS | Dashboard</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+          rel="stylesheet">
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        :root {
+            --hrms-blue: #2563eb;
+            --hrms-blue-dark: #1d4ed8;
+            --hrms-bg: #f6f8fc;
+            --hrms-text: #172033;
+            --hrms-muted: #64748b;
+            --hrms-border: #e7ebf2;
+        }
+
+        body {
+            background: var(--hrms-bg);
+            color: var(--hrms-text);
+            font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        }
+
+        .main-content {
+            margin-left: 248px;
+            min-height: 100vh;
+            padding: 22px 28px 36px;
+        }
+
+        .topbar {
+            min-height: 64px;
+            background: #fff;
+            border: 1px solid var(--hrms-border);
+            border-radius: 14px;
+            padding: 0 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 4px 16px rgba(15, 23, 42, .035);
+        }
+
+        .topbar-title {
+            font-size: 15px;
+            font-weight: 650;
+            color: #253047;
+        }
+
+        .topbar-subtitle {
+            font-size: 12px;
+            color: var(--hrms-muted);
+            margin-top: 2px;
+        }
+
+        .date-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            background: #f8fafc;
+            border: 1px solid var(--hrms-border);
+            color: #475569;
+            padding: 8px 11px;
+            border-radius: 9px;
+            font-size: 12px;
+        }
+
+        .page-heading {
+            margin: 30px 2px 20px;
+        }
+
+        .page-heading h1 {
+            font-size: 27px;
+            font-weight: 700;
+            letter-spacing: -.5px;
+            margin: 0;
+        }
+
+        .page-heading p {
+            margin: 5px 0 0;
+            color: var(--hrms-muted);
+            font-size: 13px;
+        }
+
+        .welcome-card {
+            border: 0;
+            border-radius: 16px;
+            padding: 24px 26px;
+            color: #fff;
+            background: linear-gradient(110deg, #1d4ed8, #2563eb 55%, #3b82f6);
+            box-shadow: 0 12px 28px rgba(37, 99, 235, .16);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .welcome-card::after {
+            content: "";
+            position: absolute;
+            width: 210px;
+            height: 210px;
+            border-radius: 50%;
+            right: -70px;
+            top: -100px;
+            border: 1px solid rgba(255,255,255,.16);
+            box-shadow: 0 0 0 35px rgba(255,255,255,.035),
+                        0 0 0 70px rgba(255,255,255,.025);
+        }
+
+        .welcome-card h2 {
+            font-size: 21px;
+            margin: 0 0 7px;
+            font-weight: 650;
+        }
+
+        .welcome-card p {
+            max-width: 680px;
+            color: rgba(255,255,255,.82);
+            font-size: 13px;
+            line-height: 1.65;
+            margin: 0;
+        }
+
+        .welcome-date {
+            display: inline-block;
+            margin-top: 15px;
+            padding: 6px 10px;
+            border-radius: 7px;
+            background: rgba(255,255,255,.12);
+            color: rgba(255,255,255,.9);
+            font-size: 11px;
+        }
+
+        .stat-link {
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .stat-card {
+            background: #fff;
+            border: 1px solid var(--hrms-border);
+            border-radius: 14px;
+            padding: 19px;
+            height: 100%;
+            transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-3px);
+            border-color: #d8e2f6;
+            box-shadow: 0 10px 24px rgba(15, 23, 42, .07);
+        }
+
+        .stat-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .stat-label {
+            color: var(--hrms-muted);
+            font-size: 12px;
+            font-weight: 550;
+        }
+
+        .stat-icon {
+            width: 34px;
+            height: 34px;
+            border-radius: 9px;
+            display: grid;
+            place-items: center;
+            background: #eff6ff;
+            color: var(--hrms-blue);
+        }
+
+        .stat-icon svg {
+            width: 18px;
+            height: 18px;
+            stroke: currentColor;
+            fill: none;
+            stroke-width: 1.8;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .stat-number {
+            font-size: 28px;
+            font-weight: 700;
+            margin-top: 12px;
+            letter-spacing: -.5px;
+        }
+
+        .section-title {
+            font-size: 17px;
+            font-weight: 650;
+            margin-bottom: 15px;
+        }
+
+        .module-card {
+            background: #fff;
+            border: 1px solid var(--hrms-border);
+            border-radius: 14px;
+            padding: 19px;
+            min-height: 142px;
+            transition: transform .18s ease, box-shadow .18s ease;
+        }
+
+        .module-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 9px 22px rgba(15, 23, 42, .06);
+        }
+
+        .module-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            display: grid;
+            place-items: center;
+            background: #f1f5f9;
+            color: #334155;
+            margin-bottom: 13px;
+        }
+
+        .module-icon svg {
+            width: 18px;
+            height: 18px;
+            stroke: currentColor;
+            fill: none;
+            stroke-width: 1.8;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .module-card h5 {
+            font-size: 14px;
+            font-weight: 650;
+            margin-bottom: 6px;
+        }
+
+        .module-card p {
+            color: var(--hrms-muted);
+            font-size: 12px;
+            line-height: 1.55;
+            margin: 0;
+        }
+
+        .chart-card, .stack-card {
+            background: #fff;
+            border: 1px solid var(--hrms-border);
+            border-radius: 14px;
+            padding: 20px;
+            box-shadow: 0 3px 12px rgba(15,23,42,.025);
+        }
+
+        .chart-title {
+            font-size: 14px;
+            font-weight: 650;
+            margin-bottom: 18px;
+        }
+
+        .chart-wrap {
+            height: 245px;
+        }
+
+        .stack-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .stack-list li {
+            background: #f8fafc;
+            border: 1px solid var(--hrms-border);
+            color: #475569;
+            border-radius: 8px;
+            padding: 7px 10px;
+            font-size: 11px;
+        }
+
+        @media (max-width: 900px) {
+            .main-content {
+                margin-left: 210px;
+                padding: 18px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div th:replace="fragments/sidebar :: sidebar"></div>
+
+<main class="main-content">
+
+    <div class="topbar">
+        <div>
+            <div class="topbar-title">Smart Employee Attendance &amp; Leave Management System</div>
+            <div class="topbar-subtitle">Centralized employee and workforce management</div>
+        </div>
+        <div class="date-pill">
+            <span>Today</span>
+            <strong th:text="${today}"></strong>
+        </div>
+    </div>
+
+    <div class="page-heading">
+        <h1>Dashboard</h1>
+        <p>A quick overview of employees, attendance and leave activity.</p>
+    </div>
+
+    <section class="welcome-card mb-4">
+        <h2>Welcome to Smart HRMS</h2>
+        <p>
+            Manage employees, departments, attendance records and leave requests
+            from one centralized dashboard.
+        </p>
+        <span class="welcome-date">System date: <strong th:text="${today}"></strong></span>
+    </section>
+
+    <div class="row g-3 mb-5">
+
+        <div class="col-md-6 col-xl-3">
+            <a href="/employees" class="stat-link">
+                <div class="stat-card">
+                    <div class="stat-top">
+                        <span class="stat-label">Employees</span>
+                        <span class="stat-icon">
+                            <svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                        </span>
+                    </div>
+                    <div class="stat-number" th:text="${employees}"></div>
+                </div>
+            </a>
+        </div>
+
+        <div class="col-md-6 col-xl-3">
+            <a href="/departments" class="stat-link">
+                <div class="stat-card">
+                    <div class="stat-top">
+                        <span class="stat-label">Departments</span>
+                        <span class="stat-icon">
+                            <svg viewBox="0 0 24 24"><path d="M3 21h18"></path><path d="M5 21V5l7-3 7 3v16"></path><path d="M10 21v-5h4v5"></path></svg>
+                        </span>
+                    </div>
+                    <div class="stat-number" th:text="${departments}"></div>
+                </div>
+            </a>
+        </div>
+
+        <div class="col-md-6 col-xl-3">
+            <a href="/attendance" class="stat-link">
+                <div class="stat-card">
+                    <div class="stat-top">
+                        <span class="stat-label">Attendance Records</span>
+                        <span class="stat-icon">
+                            <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="17" rx="2"></rect><path d="M16 2v4M8 2v4M3 10h18"></path><path d="m8 15 2 2 5-5"></path></svg>
+                        </span>
+                    </div>
+                    <div class="stat-number" th:text="${attendance}"></div>
+                </div>
+            </a>
+        </div>
+
+        <div class="col-md-6 col-xl-3">
+            <a href="/leaves" class="stat-link">
+                <div class="stat-card">
+                    <div class="stat-top">
+                        <span class="stat-label">Leave Requests</span>
+                        <span class="stat-icon">
+                            <svg viewBox="0 0 24 24"><path d="M6 3h9l3 3v15H6z"></path><path d="M15 3v4h4"></path><path d="M9 13h6M9 17h4"></path></svg>
+                        </span>
+                    </div>
+                    <div class="stat-number" th:text="${leaves}"></div>
+                </div>
+            </a>
+        </div>
+
+    </div>
+
+    <section class="mb-5">
+        <div class="section-title">System Modules</div>
+
+        <div class="row g-3">
+
+            <div class="col-md-6 col-xl-3">
+                <div class="module-card">
+                    <div class="module-icon">
+                        <svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle></svg>
+                    </div>
+                    <h5>Employee Management</h5>
+                    <p>Add, update, search and manage employee information.</p>
+                </div>
+            </div>
+
+            <div class="col-md-6 col-xl-3">
+                <div class="module-card">
+                    <div class="module-icon">
+                        <svg viewBox="0 0 24 24"><path d="M3 21h18"></path><path d="M5 21V5l7-3 7 3v16"></path><path d="M9 8h1M14 8h1M9 12h1M14 12h1"></path></svg>
+                    </div>
+                    <h5>Department Management</h5>
+                    <p>Maintain department information and employee grouping.</p>
+                </div>
+            </div>
+
+            <div class="col-md-6 col-xl-3">
+                <div class="module-card">
+                    <div class="module-icon">
+                        <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="17" rx="2"></rect><path d="M16 2v4M8 2v4M3 10h18"></path></svg>
+                    </div>
+                    <h5>Attendance Tracking</h5>
+                    <p>Record and review employee check-in and check-out activity.</p>
+                </div>
+            </div>
+
+            <div class="col-md-6 col-xl-3">
+                <div class="module-card">
+                    <div class="module-icon">
+                        <svg viewBox="0 0 24 24"><path d="M6 3h9l3 3v15H6z"></path><path d="M15 3v4h4"></path><path d="M9 13h6"></path></svg>
+                    </div>
+                    <h5>Leave Management</h5>
+                    <p>Manage employee leave requests and their status.</p>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <section class="mb-4">
+        <div class="section-title">Analytics</div>
+
+        <div class="row g-3">
+
+            <div class="col-lg-6">
+                <div class="chart-card">
+                    <div class="chart-title">Employees by Department</div>
+                    <div class="chart-wrap">
+                        <canvas id="departmentChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <div class="chart-card">
+                    <div class="chart-title">Leave Status</div>
+                    <div class="chart-wrap">
+                        <canvas id="leaveChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <section class="stack-card mt-3">
+        <div class="section-title mb-3">Technology Stack</div>
+        <ul class="stack-list">
+            <li>Java 17</li>
+            <li>Spring Boot</li>
+            <li>Spring Data JPA</li>
+            <li>Hibernate</li>
+            <li>MySQL</li>
+            <li>Swagger OpenAPI</li>
+            <li>Thymeleaf</li>
+            <li>Bootstrap 5</li>
+            <li>Chart.js</li>
+        </ul>
+    </section>
+
+</main>
+
+<script>
+    const departmentChart = new Chart(
+        document.getElementById('departmentChart'),
+        {
+            type: 'doughnut',
+            data: {
+                labels: ['IT', 'HR', 'Finance', 'Marketing'],
+                datasets: [{
+                    data: [12, 5, 3, 4],
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            usePointStyle: true,
+                            padding: 16,
+                            font: { size: 11 }
+                        }
+                    }
+                },
+                cutout: '62%'
+            }
+        }
+    );
+
+    const leaveChart = new Chart(
+        document.getElementById('leaveChart'),
+        {
+            type: 'bar',
+            data: {
+                labels: ['Approved', 'Pending', 'Rejected'],
+                datasets: [{
+                    label: 'Leave Requests',
+                    data: [10, 3, 2],
+                    borderRadius: 5,
+                    maxBarThickness: 42
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: { precision: 0 },
+                        grid: { color: '#eef2f7' }
+                    },
+                    x: {
+                        grid: { display: false }
+                    }
+                }
+            }
+        }
+    );
+</script>
+
+</body>
+</html>
